@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 5 OOP Task Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        form { margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; }
+        form input, form select, form button { display: block; width: 100%; margin-bottom: 10px; padding: 8px; box-sizing: border-box; }
+      .error { color: red; font-weight: bold; margin-bottom: 15px; }
+      .task-card { background: white; padding: 15px; margin-bottom: 10px; border-left: 5px solid #ccc; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-width: 400px;}
+      .priority-high { border-left-color: #ff4d4d; }
+      .priority-medium { border-left-color: #ffa500; }
+      .priority-low { border-left-color: #2ecc71; }
+      .task-card button { padding: 6px 10px; margin-right: 5px; margin-top: 8px; cursor: pointer; border: none; border-radius: 4px; }
+      .task-card button[data-action="complete"] { background: #2ecc71; color: white; }
+      .task-card button[data-action="delete"] { background: #e74c3c; color: white; }
+    </style>
+</head>
+<body>
+    <h2>Task Manager</h2>
+
+    <form id="task-form">
+        <input type="text" id="task-title" placeholder="Task Title" required>
+        <input type="text" id="task-desc" placeholder="Task Description" required>
+        <select id="task-priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+        </select>
+        <input type="date" id="task-date" placeholder="Due Date (Optional)">
+        <button type="submit">Add Task</button>
+    </form>
+
+    <div id="error-display" class="error"></div>
+    <div id="task-list-container"></div>
+
+    <script>
+        class Task {
+            constructor(title, description, priority = 'medium') {
+                if (!title || title.trim() === "") throw new Error('Title is required.');
+                if (!description || description.trim() === "") throw new Error('Description is required.');
+
+                const validPriorities = ['low', 'medium', 'high'];
+                if (!validPriorities.includes(priority.toLowerCase())) {
+                    throw new Error('Priority must be low, medium, or high.');
+                }
+
+                this.title = title;
+                this.description = description;
+                this.priority = priority.toLowerCase();
+                this.status = 'pending';
+            }
+            complete() { this.status = 'completed'; }
+
+            toString() {
+                return `${this.title} | ${this.priority} | ${this.status}`;
+            }
+        }
+
+        class PriorityTask extends Task {
+            constructor(title, description, priority, dueDate) {
+                super(title, description, priority);
+                if (!dueDate) throw new Error('Due date is required for priority tasks.');
+                const parsedDate = new Date(dueDate);
+                if (isNaN(parsedDate.getTime())) throw new Error('Due date is invalid.');
+                this.dueDate = parsedDate;
+            }
+            getFormattedDueDate() {
+                return this.dueDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            toString() {
+                return `${super.toString()} | Due: ${this.getFormattedDueDate()}`;
+            }
+        }
+
+        const taskForm = document.getElementById('task-form');
+        const taskContainer = document.getElementById('task-list-container');
+        const errorDisplay = document.getElementById('error-display');
+
+        let taskList = [];
+
+        function renderTasks() {
+            taskContainer.innerHTML = "";
+            errorDisplay.textContent = "";
+
+            taskList.forEach((task, index) => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card priority-${task.priority}`;
+                if (task.status === 'completed') taskCard.style.opacity = '0.6';
+
+                taskCard.innerHTML = `
+                    <h3>${task.title}</h3>
+                    <p>${task.description}</p>
+                    <p><strong>Info:</strong> ${task.toString()}</p>
+                    <button data-action="complete" data-index="${index}">Complete</button>
+                    <button data-action="delete" data-index="${index}">Delete</button>
+                `;
+                taskContainer.appendChild(taskCard);
+            });
+        }
+
+        taskContainer.addEventListener('click', e => {
+            const index = e.target.dataset.index;
+            const action = e.target.dataset.action;
+            if (action === 'complete') {
+                taskList[index].complete();
+                renderTasks();
+            }
+            if (action === 'delete') {
+                taskList.splice(index, 1);
+                renderTasks();
+            }
+        });
+
+        taskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('task-title').value;
+            const desc = document.getElementById('task-desc').value;
+            const priority = document.getElementById('task-priority').value;
+            const dueDate = document.getElementById('task-date').value;
+
+            try {
+                let newTask;
+                if (dueDate) {
+                    newTask = new PriorityTask(title, desc, priority, dueDate);
+                } else {
+                    newTask = new Task(title, desc, priority);
+                }
+
+                taskList.push(newTask);
+                renderTasks();
+                taskForm.reset();
+            } catch (error) {
+                errorDisplay.textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>
