@@ -1,0 +1,73 @@
+// ==========================================
+// 1. VARIABLES & TYPEOF EXPERIMENT
+// ==========================================
+console.log("--- Task 1: Variables & typeof ---");
+
+let currentScore = 95;
+const maxPlayers = 4;
+
+console.log("currentScore value:", currentScore, "| Type:", typeof currentScore);
+console.log("maxPlayers value:", maxPlayers, "| Type:", typeof maxPlayers);
+
+// Experimenting with re-assignment
+currentScore = 100; // Allowed
+// maxPlayers = 5;  // Uncaught TypeError: Assignment to constant variable.
+
+console.log("Updated currentScore:", currentScore);
+console.log("\n");
+
+
+// ==========================================
+// 2. EVEN OR ODD CHECKER
+// ==========================================
+console.log("--- Task 2: Even or Odd Checker ---");
+
+function checkEvenOrOdd(number) {
+    if (number % 2 === 0) {
+        console.log(`${number} is Even`);
+    } else {
+        console.log(`${number} is Odd`);
+    }
+}
+
+checkEvenOrOdd(7);  // Output: 7 is Odd
+checkEvenOrOdd(12); // Output: 12 is Even
+console.log("\n");
+
+
+// ==========================================
+// 3. FIZZ LOOP (1-20)
+// ==========================================
+console.log("--- Task 3: Fizz Loop ---");
+
+for (let i = 1; i <= 20; i++) {
+    if (i % 3 === 0) {
+        console.log(`${i} - Fizz`);
+    } else {
+        console.log(i);
+    }
+}
+console.log("\n");
+
+
+const prompt = require("prompt-sync")();
+
+function playGuessingGame() {
+    const secretNumber = 7;
+    let userGuess = null;
+
+    console.log("--- Task 4: Guessing Game Started ---");
+
+    while (userGuess !== secretNumber) {
+        const input = prompt("Guess a number between 1 and 10: ");
+        userGuess = Number(input);
+
+        if (userGuess === secretNumber) {
+            console.log("🎉 Correct! You guessed the secret number!");
+        } else {
+            console.log(`Wrong guess (${userGuess}). Try again!`);
+        }
+    }
+}
+
+playGuessingGame();
